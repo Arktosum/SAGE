@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "string.h": "c",
-        "glad.h": "c"
+        "glad.h": "c",
+        "xstring": "cpp"
     }
 }
