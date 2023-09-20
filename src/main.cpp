@@ -11,7 +11,6 @@ class Window
 {
 private:
     GLFWwindow *window;
-
 public:
     Window(int width, int height, const std::string &title)
     {
@@ -42,7 +41,7 @@ public:
         // Load OpenGL functions using GLAD
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
         {
-            std::cout << "Failed to initialize GLAD" << std::endl;
+            std::cerr << "Failed to initialize GLAD" << std::endl;
             std::exit(EXIT_FAILURE);
         }
     }
@@ -51,30 +50,25 @@ public:
     {
         glfwTerminate();
     }
-
     bool shouldClose() const
     {
         return glfwWindowShouldClose(window);
     }
-
     void swapBuffers()
     {
         glfwSwapBuffers(window);
     }
-
     void pollEvents()
     {
         glfwPollEvents();
     }
-
     GLFWwindow *getGLFWWindow() const
     {
         return window;
     }
 
 private:
-    static void framebuffer_size_callback(GLFWwindow *window, int width, int height)
-    {
+    static void framebuffer_size_callback(GLFWwindow *window, int width, int height){
         glViewport(0, 0, width, height);
     }
 };
