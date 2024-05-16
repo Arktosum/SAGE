@@ -1,6 +1,31 @@
 #include "../include/shader.h"
-
 #include <iostream>
+
+int Shader::getUniformLocation(const std::string &name)
+{
+    int location = glGetUniformLocation(shaderProgram, name.c_str());
+    if (location == -1)
+    {
+        std::cerr << "Shader::getUniformLocation failed -1" << std::endl;
+        exit(-1);
+    }
+
+    return location;
+}
+
+void Shader::setUniformMatrix4fv(const std::string &name, glm::mat4 &matrix)
+{
+    int location = Shader::getUniformLocation(name);
+    // GLint location, GLsizei count, GLboolean transpose, const GLfloat *value
+    glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]);
+}
+
+void Shader::setUniform1f(const std::string &name, float value)
+{
+    int location = Shader::getUniformLocation(name);
+    glUniform1f(location, value);
+}
+
 std::string readFile(const std::string &filename)
 {
     std::ifstream file(filename); // Open the file
@@ -76,4 +101,6 @@ void Shader::use()
     glUseProgram(shaderProgram);
 }
 
-Shader::~Shader() {}
+Shader::~Shader() {
+    glDeleteShader(shaderProgram);
+}

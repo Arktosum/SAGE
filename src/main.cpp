@@ -6,6 +6,7 @@
 #include "../include/IBO.h"
 #include "math.h"
 #include "../include/glm/glm.hpp"
+#include "../include/glm/gtc/matrix_transform.hpp"
 
 Window window(1920, 1080, "Hello OpenGL!");
 Shader shader("../shaders/vert.glsl", "../shaders/frag.glsl");
@@ -18,10 +19,10 @@ void setup()
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float vertices[] = {
-        1.0f, 1.0f, 0.0f,   // top right
-        1.0f, -1.0f, 0.0f,  // bottom right
-        -1.0f, -1.0f, 0.0f, // bottom left
-        -1.0f, 1.0f, 0.0f   // top left
+        0.5f, 0.5f, 0.0f,   // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f   // top left
     };
     unsigned int indices[] = {
         // note that we start from 0!
@@ -34,7 +35,6 @@ void setup()
     // ATTRIB
     // EBO
 
-
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
     VertexBuffer vbo(vertices, sizeof(vertices));
@@ -46,19 +46,22 @@ void setup()
 
 void loop()
 {
-    double time = glfwGetTime();
-    int location = glGetUniformLocation(shader.shaderProgram, "u_time");
-    glUniform1f(location, time);
 
+    double time = glfwGetTime();
+    float angle = glm::radians(100 * time);
+    glm::vec3 axis(0.0f, 0.0f, 1.0f);
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 rotationMatrix = glm::rotate(model, angle, axis);
+    model = rotationMatrix * model;
+    shader.setUniform1f("u_time", time);
+    shader.setUniformMatrix4fv("u_matrix", model);
     shader.use();
-    glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
-    // glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(VAO); 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
-
 int main()
 {
-    // window.setup(setup);
-    // window.loop(loop);
+    window.setup(setup);
+    window.loop(loop);
     return 0;
 }
