@@ -8,6 +8,17 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_GRAVE_ACCENT) == GLFW_PRESS)
+    {
+        // Wireframe Mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        // Normal mode
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
 
 Window::Window(unsigned int width = 800, unsigned int height = 600, const char *title = "Test window") : width(width), height(height), title(title)

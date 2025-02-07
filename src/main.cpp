@@ -10,7 +10,8 @@ void render()
 
     glUseProgram(shaderProgram);
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
 }
 int main()
 {
@@ -105,10 +106,16 @@ int main()
     glDeleteShader(fragmentShaderID);
 
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.0f, 0.5f, 0.0f};
-
+        0.5f, 0.5f, 0.0f,   // top right
+        0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f   // top left
+    };
+    unsigned int indices[] = {
+        // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
     // Bind VAO first. then bind VBOs and attrib pointers to this VAO.
     // only need to bind the VAO to get same results.
 
@@ -132,6 +139,12 @@ int main()
             - GL_DYNAMIC_DRAW: the data is changed a lot and used many times. (slow)
     */
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     unsigned int vertex_attribute_layout = 0;
     unsigned int SHOULD_NORMALIZE = GL_FALSE;
