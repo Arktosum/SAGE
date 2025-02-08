@@ -65,8 +65,11 @@ Terminology
     - GL_TRIANGLES
     - GL_LINE_STRIP etc..
   
-
-
+# Textures
+- Basically a 1D or 2D image that we can use to give alot of detail to the shapes.
+- ![alt text](image-3.png)
+- Each vertex must sample from a texture in texture space , i.e , each vertex must has its own texture coordinate
+- Once that's done , the rest of the image is interpolated by the fragment shader.
 
 # Fragment Shader
 - A fragment in OpenGL is all the data required for OpenGL to render a single pixel.
