@@ -48,7 +48,6 @@ Window::Window(unsigned int width = 800, unsigned int height = 600, const char *
     // For example, a processed point of location (-0.5,0.5) would (as its final transformation) be mapped to (200,450) in screen coordinates.
     // Note that processed coordinates in OpenGL are between -1 and 1 so we effectively map from the range (-1 to 1) to (0, 800) and (0, 600).
     glViewport(0, 0, width, height);
-    glEnable(GL_DEPTH_TEST);
     glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
 }
 
@@ -69,9 +68,6 @@ void Window::run(void (*render)())
             As soon as all the rendering commands are finished we swap the back buffer to the front buffer so the image can be displayed without still being rendered to, removing all the aforementioned artifacts.
         */
         // input
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         processInput(this->window);
         // rendering commands here
         render();

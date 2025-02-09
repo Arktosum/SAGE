@@ -79,37 +79,6 @@ Terminology
 
 
 
-# Coordinate Spaces
-
-- Local space (or Object space)
-- World space
-- View space (or Eye space)
-- Clip space
-- Screen space
-![alt text](image-4.png)
-
-## Local Space
-- Object is considered 0,0. all vertices are assumed to be relatived to the object itself.
-  
-World space = Model Matrix*Local Space
-## World Space
-- Contains multiple objects and has its own 0,0. all objects are considered relative to world space.
-
-View space = View Matrix * World Space
-
-## View space
-- Viwer or Camera becomes the center (0,0). the whole world is going to be relative to the camera.
-
-Clip space = Projection Matrix * View Space
-## Clip space
-- Uses projection information to convert the 3D data to 2D points on the screen in NORMALIZED DEVICE COORDINATES (NDC).
-  
-# View Port transform
-- Uses Viewport information of the device to scale upto our desired scree resolution.
-
-$$
-V_{clip} = M_{projection} \cdot M_{view} \cdot M_{model} \cdot V_{local}
-$$
 
 # Note
 
