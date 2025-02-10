@@ -5,8 +5,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
 
 # Add All source files.
-file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.c)
-add_executable(result ${SOURCES})
+file(GLOB_RECURSE SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.c)
+file(GLOB_RECURSE EXTERNAL_SOURCES ${CMAKE_SOURCE_DIR}/external/*.cpp ${CMAKE_SOURCE_DIR}/external/*.c)
+add_executable(result ${SOURCES} ${EXTERNAL_SOURCES})
 
 target_include_directories(result PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_include_directories(result PRIVATE ${CMAKE_SOURCE_DIR}/external)
