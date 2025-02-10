@@ -32,7 +32,11 @@ public:
     unsigned int compileShader(ShaderType type, const std::string &file_path);
     void bind() const;
     void unbind() const;
-    void setUniform4f(const std::string &uniform_name, glm::vec4& vector);
+    void setUniform4f(const std::string &uniform_name, glm::vec4 &vector);
+    void setUniform3f(const std::string &uniform_name, glm::vec3 &vector);
+
     void setUniform1i(const std::string &uniform_name, int value);
-    void setUniformMat4fv(const std::string &uniform_name, glm::mat4& matrix);
+    void setUniform1f(const std::string &uniform_name, float value);
+    void setUniformMat4fv(const std::string &uniform_name, glm::mat4 &matrix);
+
 };

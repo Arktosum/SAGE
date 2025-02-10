@@ -81,6 +81,27 @@ $$
 LookAt = \begin{bmatrix} \color{red}{R_x} & \color{red}{R_y} & \color{red}{R_z} & 0 \\ \color{green}{U_x} & \color{green}{U_y} & \color{green}{U_z} & 0 \\ \color{blue}{D_x} & \color{blue}{D_y} & \color{blue}{D_z} & 0 \\ 0 & 0 & 0  & 1 \end{bmatrix} * \begin{bmatrix} 1 & 0 & 0 & -\color{purple}{P_x} \\ 0 & 1 & 0 & -\color{purple}{P_y} \\ 0 & 0 & 1 & -\color{purple}{P_z} \\ 0 & 0 & 0  & 1 \end{bmatrix}
 $$
 
+
+# Lighting
+
+In real life, an object gets a ray (usually sunlight).
+- this ray would be absorbed by the object. and what is reflected is what we perceive as color.
+- This phenomenon can be digitized as
+
+perceived_color = object_color * lightColor
+
+where all colors are RGB values with 3 Dimensions.
+
+so we can see when light Color is 1,1,1 (WHITE) , The perceived color is basically the objects color.
+but if the perceived color is something like (0,1,0) ( GREEN ),
+only the green channel of the object is reflected.
+Therefore a RED object cannot be really seen properly under a green light. and and so on!
+
+![alt text](image-5.png)
+
+- Ambient lighting: even when it is dark there is usually still some light somewhere in the world (the moon, a distant light) so objects are almost never completely dark. To simulate this we use an ambient lighting constant that always gives the object some color.
+- Diffuse lighting: simulates the directional impact a light object has on an object. This is the most visually significant component of the lighting model. The more a part of an object faces the light source, the brighter it becomes.
+- Specular lighting: simulates the bright spot of a light that appears on shiny objects. Specular highlights are more inclined to the color of the light than the color of the object.
 # Note
 
 - Vertex must have values between [-1,1] also known as NDC ( Normalized Device coordinates )

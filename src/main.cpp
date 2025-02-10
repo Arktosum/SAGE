@@ -20,6 +20,9 @@ bool firstMouse = true;
 
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f;
+
+float u_ambientStrength = 0.1f;
+float u_specularStrength = 0.5f;
 int main()
 {
     glfwInit();
@@ -63,7 +66,8 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(window, true); // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
 
-    Shader shader("./shaders/vert.glsl", "./shaders/frag.glsl");
+    Shader object_shader("./shaders/object.vert", "./shaders/object.frag");
+    Shader light_shader("./shaders/light.vert", "./shaders/light.frag");
     // --------------------------------------------------------------------------------------------------
 
     float quad_vertices[] = {
@@ -116,37 +120,79 @@ int main()
         -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
         -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
 
+    float light_cube_vertices[] = {
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f};
+
     unsigned int indices[] = {
         // note that we start from 0!
         0, 1, 3, // first triangle
         1, 2, 3  // second triangle
     };
-    glm::vec4 color(1.0f, 0.0f, 0.0f, 1.0f);
 
     VertexArray vao;
-    VertexBuffer vbo(cube_vertices, sizeof(cube_vertices));
+    VertexBuffer vbo(light_cube_vertices, sizeof(light_cube_vertices));
     VertexBufferLayout rectangle_layout;
     rectangle_layout.pushAttribute(3, GL_FLOAT, false);
-    rectangle_layout.pushAttribute(2, GL_FLOAT, false);
+    rectangle_layout.pushAttribute(3, GL_FLOAT, false);
     vao.addBuffer(vbo, rectangle_layout);
     // ElementBuffer ebo(indices, sizeof(indices));
 
-    shader.bind();
+    // shader.bind();
 
-    Texture texture("./assets/duck.jpg");
-    unsigned int texture_slot = 0;
-    texture.bind(texture_slot);
-    shader.setUniform1i("u_texture", texture_slot);
+    // Texture texture("./assets/duck.jpg");
+    // unsigned int texture_slot = 0;
+    // texture.bind(texture_slot);
+    // shader.setUniform1i("u_texture", texture_slot);
 
-    shader.unbind();
+    // shader.unbind();
     // ebo.unbind();
     vbo.unbind();
     vao.unbind();
-    glm::vec3 rotation(0.0f);
-
-    float fov_degrees = 45.0f;
     Renderer renderer;
 
+    glm::vec3 objectColor(1.0f);
+    glm::vec3 lightColor(1.0f);
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
     float lastFrame = 0.0f; // Time of last frame
     while (!glfwWindowShouldClose(window))
     {
@@ -183,9 +229,16 @@ int main()
             ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
             // ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
             // ImGui::Checkbox("Another Window", &show_another_window);
-            ImGui::SliderFloat("Rotation speed", &rotation.x, -180.0f, 180.0f);
+            ImGui::SliderFloat("Light Position X", &lightPos.x, -5.0f, 5.0f);
+            ImGui::SliderFloat("Light Position Y", &lightPos.y, -5.0f, 5.0f);
+            ImGui::SliderFloat("Light Position Z", &lightPos.z, -5.0f, 5.0f);
 
-            // ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("Object color", &objectColor.x); // Edit 3 floats representing a color
+            ImGui::ColorEdit3("light color", &lightColor.x);   // Edit 3 floats representing a color
+
+            ImGui::SliderFloat("u_ambientStrength", &u_ambientStrength, 0.1f, 1.0f);
+            ImGui::SliderFloat("u_specularStrength", &u_specularStrength, 0.1f, 1.0f);
+
             // if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
             //     counter++;
             ImGui::SameLine();
@@ -196,18 +249,38 @@ int main()
         }
         // ------------------- rendering commands here ------------------
         renderer.clear();
-        glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime() * glm::radians(rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 model = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)), (float)glfwGetTime() * glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), aspect_ratio, 0.1f, 100.0f);
-        glm::mat4 mvp = projection * view * model;
-        shader.bind();
-        shader.setUniformMat4fv("u_mvp", mvp);
+        object_shader.bind();
+        object_shader.setUniformMat4fv("u_model", model);
+        object_shader.setUniformMat4fv("u_view", view);
+        object_shader.setUniformMat4fv("u_projection", projection);
+        object_shader.setUniform3f("u_objectColor", objectColor);
+        object_shader.setUniform3f("u_lightColor", lightColor);
+        object_shader.setUniform3f("u_viewPos", camera.Position);
+        object_shader.setUniform1f("u_ambientStrength", u_ambientStrength);
+        object_shader.setUniform1f("u_specularStrength", u_specularStrength);
+
+        lightPos = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime() * deltaTime * glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(lightPos, 1.0);
+        object_shader.setUniform3f("u_lightPos", lightPos);
         // send uniforms here
         // renderer.draw(vao, ebo, shader);
-        shader.bind();
+        object_shader.bind();
         vao.bind();
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        // ------------------------------------------------------------------------------------
 
+        model = glm::rotate(glm::translate(glm::mat4(1.0f), lightPos), (float)glfwGetTime() * glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        glm::mat4 mvp = projection * view * model;
+        light_shader.bind();
+        light_shader.setUniformMat4fv("u_mvp", mvp);
+        light_shader.setUniform3f("u_lightColor", lightColor);
+        // send uniforms here
+        // renderer.draw(vao, ebo, shader);
+        light_shader.bind();
+        vao.bind();
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         // ---------------------------------------------------------------------
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -245,10 +318,12 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        camera.disableMouse = false;
     }
     if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
     {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        camera.disableMouse = true;
     }
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
