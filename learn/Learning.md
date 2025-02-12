@@ -110,3 +110,13 @@ Therefore a RED object cannot be really seen properly under a green light. and a
 - Specifically, the data returned by the vertex shader MUST be in NDC
 - The NDC to device screen is transformed by the fragment shader using glViewport information
 - Sending data to the graphics card from the CPU is relatively slow, so wherever we can we try to send as much data as possible at once.
+
+
+
+# Primitives
+
+![alt text](image-6.png)
+
+![alt text](image-7.png)
+
+![alt text](image-8.png)

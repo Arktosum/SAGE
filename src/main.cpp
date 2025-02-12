@@ -1,12 +1,12 @@
 #include "GLManager.hpp"
 #include <GLFW/glfw3.h>
-#include "renderer.hpp"
 #include "texture.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
 #include "camera.hpp"
+#include "model.hpp"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -17,13 +17,10 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 float lastX = 1920.0f / 2.0f;
 float lastY = 1080.0f / 2.0f;
 bool firstMouse = true;
-
 float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f;
+GLFWwindow *window;
 
-float u_ambientStrength = 0.1f;
-float u_specularStrength = 0.5f;
-int main()
+void glfw_init_window(unsigned int width, unsigned int height, const std::string &title)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -31,7 +28,7 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    GLFWwindow *window = glfwCreateWindow(1920, 1080, "Open GL", NULL, NULL);
+    window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
     if (window == NULL)
     {
@@ -49,12 +46,16 @@ int main()
     // Behind the scenes OpenGL uses the data specified via glViewport to transform the 2D coordinates it processed to coordinates on your screen.
     // For example, a processed point of location (-0.5,0.5) would (as its final transformation) be mapped to (200,450) in screen coordinates.
     // Note that processed coordinates in OpenGL are between -1 and 1 so we effectively map from the range (-1 to 1) to (0, 800) and (0, 600).
-    glViewport(0, 0, 1920, 1080);
+    glViewport(0, 0, width, height);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glEnable(GL_DEPTH_TEST);
-
+}
+int main()
+{
+    glfw_init_window(1920, 1080, "SAGE");
+    // --------------------------------------------------------------------------------------------------
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -65,135 +66,13 @@ int main()
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true); // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
     ImGui_ImplOpenGL3_Init();
-
-    Shader object_shader("./shaders/object.vert", "./shaders/object.frag");
-    Shader light_shader("./shaders/light.vert", "./shaders/light.frag");
     // --------------------------------------------------------------------------------------------------
 
-    float quad_vertices[] = {
-        0.5f, 0.5f, 0.0f, 1.0f, 1.0f,   // top right
-        0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f   // top left
-    };
+    Cube cube(100 * 100, "./shaders/cube/cube.vert", "./shaders/cube/cube.frag");
+    Axes axes("./shaders/axes/axes.vert", "./shaders/axes/axes.frag");
 
-    float cube_vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f};
-
-    float light_cube_vertices[] = {
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
-
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
-
-        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
-
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-        0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-        0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-        -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
-
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
-        -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f};
-
-    unsigned int indices[] = {
-        // note that we start from 0!
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
-    VertexArray vao;
-    VertexBuffer vbo(light_cube_vertices, sizeof(light_cube_vertices));
-    VertexBufferLayout rectangle_layout;
-    rectangle_layout.pushAttribute(3, GL_FLOAT, false);
-    rectangle_layout.pushAttribute(3, GL_FLOAT, false);
-    vao.addBuffer(vbo, rectangle_layout);
-    // ElementBuffer ebo(indices, sizeof(indices));
-
-    // shader.bind();
-
-    // Texture texture("./assets/duck.jpg");
-    // unsigned int texture_slot = 0;
-    // texture.bind(texture_slot);
-    // shader.setUniform1i("u_texture", texture_slot);
-
-    // shader.unbind();
-    // ebo.unbind();
-    vbo.unbind();
-    vao.unbind();
-    Renderer renderer;
-
-    glm::vec3 objectColor(1.0f);
-    glm::vec3 lightColor(1.0f);
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
     float lastFrame = 0.0f; // Time of last frame
+    float fov = 45.0f;
     while (!glfwWindowShouldClose(window))
     {
         /*
@@ -226,61 +105,43 @@ int main()
 
             ImGui::Begin("Hello, world!"); // Create a window called "Hello, world!" and append into it.
 
-            ImGui::Text("This is some useful text."); // Display some text (you can use a format strings too)
             // ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
             // ImGui::Checkbox("Another Window", &show_another_window);
-            ImGui::SliderFloat("Light Position X", &lightPos.x, -5.0f, 5.0f);
-            ImGui::SliderFloat("Light Position Y", &lightPos.y, -5.0f, 5.0f);
-            ImGui::SliderFloat("Light Position Z", &lightPos.z, -5.0f, 5.0f);
+            // ImGui::SliderFloat("Light Position X", &lightPos.x, -5.0f, 5.0f);
+            // ImGui::SliderFloat("Light Position Y", &lightPos.y, -5.0f, 5.0f);
+            // ImGui::SliderFloat("Light Position Z", &lightPos.z, -5.0f, 5.0f);
 
-            ImGui::ColorEdit3("Object color", &objectColor.x); // Edit 3 floats representing a color
-            ImGui::ColorEdit3("light color", &lightColor.x);   // Edit 3 floats representing a color
+            // ImGui::ColorEdit3("Object color", &objectColor.x); // Edit 3 floats representing a color
+            // ImGui::ColorEdit3("light color", &lightColor.x);   // Edit 3 floats representing a color
 
-            ImGui::SliderFloat("u_ambientStrength", &u_ambientStrength, 0.1f, 1.0f);
-            ImGui::SliderFloat("u_specularStrength", &u_specularStrength, 0.1f, 1.0f);
+            // ImGui::SliderFloat("u_ambientStrength", &u_ambientStrength, 0.1f, 1.0f);
+            ImGui::SliderFloat("zoom", &camera.Zoom, -180.0f, 180.0f);
+            // ImGui::SliderFloat("u_specularStrength", &u_specularStrength, 0.1f, 1.0f);
 
             // if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
             //     counter++;
-            ImGui::SameLine();
+            // ImGui::SameLine();
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-            ImGui::Text("cameraPos : %.3f %.3f %.3f", camera.Position.x, camera.Position.y, camera.Position.z);
+            // ImGui::Text("cameraPos : %.3f %.3f %.3f", camera.Position.x, camera.Position.y, camera.Position.z);
 
             ImGui::End();
         }
+        GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         // ------------------- rendering commands here ------------------
-        renderer.clear();
-        glm::mat4 model = glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)), (float)glfwGetTime() * glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        // ---------------------------------------------------------------------
+        {
+            glm::mat4 model(1.0f);
+            glm::mat4 view = camera.GetViewMatrix();
+            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)1920 / (float)1080, 0.1f, 100.0f);
+            axes.set_mvp(model, view, projection);
+            axes.display();
+        }
+        // --------------------------------------------------------------------
         glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), aspect_ratio, 0.1f, 100.0f);
-        object_shader.bind();
-        object_shader.setUniformMat4fv("u_model", model);
-        object_shader.setUniformMat4fv("u_view", view);
-        object_shader.setUniformMat4fv("u_projection", projection);
-        object_shader.setUniform3f("u_objectColor", objectColor);
-        object_shader.setUniform3f("u_lightColor", lightColor);
-        object_shader.setUniform3f("u_viewPos", camera.Position);
-        object_shader.setUniform1f("u_ambientStrength", u_ambientStrength);
-        object_shader.setUniform1f("u_specularStrength", u_specularStrength);
-
-        lightPos = glm::rotate(glm::mat4(1.0f), (float)glfwGetTime() * deltaTime * glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f)) * glm::vec4(lightPos, 1.0);
-        object_shader.setUniform3f("u_lightPos", lightPos);
-        // send uniforms here
-        // renderer.draw(vao, ebo, shader);
-        object_shader.bind();
-        vao.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        // ------------------------------------------------------------------------------------
-
-        model = glm::rotate(glm::translate(glm::mat4(1.0f), lightPos), (float)glfwGetTime() * glm::radians(0.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        glm::mat4 mvp = projection * view * model;
-        light_shader.bind();
-        light_shader.setUniformMat4fv("u_mvp", mvp);
-        light_shader.setUniform3f("u_lightColor", lightColor);
-        // send uniforms here
-        // renderer.draw(vao, ebo, shader);
-        light_shader.bind();
-        vao.bind();
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)1920 / (float)1080, 0.1f, 100.0f);
+        cube.set_vp(view, projection);
+        cube.display();
         // ---------------------------------------------------------------------
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

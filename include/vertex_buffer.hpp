@@ -6,9 +6,9 @@ private:
     unsigned int m_vbo_id;
 
 public:
-    VertexBuffer(const void *buffer_data, unsigned int size);
+    VertexBuffer();
     ~VertexBuffer();
-
+    void loadData(const void *buffer_data, unsigned int size_bytes);
     void bind() const; 
     void unbind() const;
 };
