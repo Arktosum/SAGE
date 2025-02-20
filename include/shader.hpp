@@ -5,7 +5,7 @@
 #include <sstream>
 #include <locale>
 #include <unordered_map>
-
+#include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -29,7 +29,7 @@ public:
     Shader(const std::string &vertexSourcePath, const std::string &fragmentSourcePath);
     ~Shader();
     unsigned int createShaderProgram(unsigned int vertex_shader_id, unsigned int fragment_shader_id);
-    unsigned int compileShader(ShaderType type, const std::string &file_path);
+    unsigned int compileShader(GLenum shader_type, const std::string &file_path);
     void bind() const;
     void unbind() const;
     void setUniform4f(const std::string &uniform_name, glm::vec4 &vector);
@@ -38,5 +38,4 @@ public:
     void setUniform1i(const std::string &uniform_name, int value);
     void setUniform1f(const std::string &uniform_name, float value);
     void setUniformMat4fv(const std::string &uniform_name, glm::mat4 &matrix);
-
 };

@@ -51,6 +51,7 @@ void glfw_init_window(unsigned int width, unsigned int height, const std::string
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE); // Enables us to change the point size in the shader.
 }
 int main()
 {
@@ -68,8 +69,9 @@ int main()
     ImGui_ImplOpenGL3_Init();
     // --------------------------------------------------------------------------------------------------
 
-    Cube cube(100 * 100, "./shaders/cube/cube.vert", "./shaders/cube/cube.frag");
+    // Cube cube(100 * 100, "./shaders/cube/cube.vert", "./shaders/cube/cube.frag");
     Axes axes("./shaders/axes/axes.vert", "./shaders/axes/axes.frag");
+    Circle circle("./shaders/circle/circle.vert", "./shaders/circle/circle.frag");
 
     float lastFrame = 0.0f; // Time of last frame
     float fov = 45.0f;
@@ -100,6 +102,7 @@ int main()
         int window_width, window_height;
         glfwGetWindowSize(window, &window_width, &window_height);
         float aspect_ratio = (float)window_width / (float)window_height;
+        std::cout << "window_width: " << window_width << " window_height: " << window_height << std::endl;
         processInput(window);
         {
 
@@ -130,19 +133,29 @@ int main()
         // ------------------- rendering commands here ------------------
 
         // ---------------------------------------------------------------------
+        // {
+        //     glm::mat4 model(1.0f);
+        //     glm::mat4 view = camera.GetViewMatrix();
+        //     glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), aspect_ratio, 0.1f, 100.0f);
+        //     axes.set_mvp(model, view, projection);
+        //     axes.display();
+        // }
+        // --------------------------------------------------------------------
+        // glm::mat4 view = camera.GetViewMatrix();
+        // glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)1920 / (float)1080, 0.1f, 100.0f);
+        // cube.set_vp(view, projection);
+        // cube.display();
+        // ---------------------------------------------------------------------
+
+        // ---------------------------------------------------------------------
         {
             glm::mat4 model(1.0f);
-            glm::mat4 view = camera.GetViewMatrix();
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)1920 / (float)1080, 0.1f, 100.0f);
-            axes.set_mvp(model, view, projection);
-            axes.display();
+            glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 200.0f);
+            glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
+            circle.set_mvp(model, view, projection);
+            circle.display();
         }
         // --------------------------------------------------------------------
-        glm::mat4 view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)1920 / (float)1080, 0.1f, 100.0f);
-        cube.set_vp(view, projection);
-        cube.display();
-        // ---------------------------------------------------------------------
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         // check and call events and swap the buffers

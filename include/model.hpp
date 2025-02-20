@@ -25,6 +25,9 @@
 #include "shader.hpp"
 #include "element_buffer.hpp"
 
+#include <iostream>
+#include <math.h>
+
 class Cube
 {
 
@@ -181,6 +184,48 @@ public:
         m_vao.bind();
         m_ebo.bind();
         glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, 0);
+    }
+};
+
+struct vec3
+{
+    float x, y, z;
+};
+
+void push_vec3(std::vector<float> &vertices, vec3 vertex)
+{
+    vertices.push_back(vertex.x);
+    vertices.push_back(vertex.y);
+    vertices.push_back(vertex.z);
+}
+
+class Circle
+{
+
+private:
+    VertexArray m_vao;
+    VertexBuffer m_vbo;
+    // ElementBuffer m_ebo;
+    Shader m_shader;
+    unsigned int m_vertexCount;
+
+public:
+    Circle(const std::string &vertexSourcePath, const std::string &fragmentSourcePath) : m_vao(), m_vbo(), m_shader(vertexSourcePath, fragmentSourcePath)
+    {
+        
+    };
+    void set_mvp(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection)
+    {
+        m_shader.bind();
+        m_shader.setUniformMat4fv("u_model", model);
+        m_shader.setUniformMat4fv("u_view", view);
+        m_shader.setUniformMat4fv("u_projection", projection);
+    }
+    void display()
+    {
+        m_shader.bind();
+        m_vao.bind();
+        glDrawArrays(GL_TRIANGLE_FAN, 0, m_vertexCount);
     }
 };
 

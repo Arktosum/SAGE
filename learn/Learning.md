@@ -111,8 +111,6 @@ Therefore a RED object cannot be really seen properly under a green light. and a
 - The NDC to device screen is transformed by the fragment shader using glViewport information
 - Sending data to the graphics card from the CPU is relatively slow, so wherever we can we try to send as much data as possible at once.
 
-
-
 # Primitives
 
 ![alt text](image-6.png)

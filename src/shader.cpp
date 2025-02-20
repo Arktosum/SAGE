@@ -24,8 +24,8 @@ std::string read_file(const std::string &filepath)
 Shader::Shader(const std::string &vertexSourcePath, const std::string &fragmentSourcePath)
 {
 
-    unsigned int vertex_shader_id = compileShader(ShaderType::VERTEX_SHADER, vertexSourcePath);
-    unsigned int fragment_shader_id = compileShader(ShaderType::FRAGMENT_SHADER, fragmentSourcePath);
+    unsigned int vertex_shader_id = compileShader(GL_VERTEX_SHADER, vertexSourcePath);
+    unsigned int fragment_shader_id = compileShader(GL_FRAGMENT_SHADER, fragmentSourcePath);
 
     m_shader_program_id = createShaderProgram(vertex_shader_id, fragment_shader_id);
 }
@@ -60,10 +60,10 @@ unsigned int Shader::createShaderProgram(unsigned int vertex_shader_id, unsigned
     GLCall(glDeleteShader(fragment_shader_id));
     return shader_program_id;
 }
-unsigned int Shader::compileShader(ShaderType type, const std::string &file_path)
+unsigned int Shader::compileShader(GLenum shader_type, const std::string &file_path)
 {
 
-    GLCall(unsigned int shader_id = glCreateShader(type == ShaderType::VERTEX_SHADER ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER));
+    GLCall(unsigned int shader_id = glCreateShader(shader_type));
     // 1 - ID of shader
     // 2 - Total number of strings ( only one in this case which is the whole program)
     // 3 - The source file string
@@ -79,14 +79,15 @@ unsigned int Shader::compileShader(ShaderType type, const std::string &file_path
     if (!success)
     {
         GLCall(glGetShaderInfoLog(shader_id, 512, NULL, infoLog));
-        std::string shader_type = (type == ShaderType::VERTEX_SHADER) ? "VERTEX" : "FRAGMENT";
-        std::cout << "ERROR::SHADER::" << shader_type << "::COMPILATION_FAILED\n"
+        std::string shader_type_name = (shader_type == GL_VERTEX_SHADER) ? "VERTEX" : "FRAGMENT";
+        std::cout << "ERROR:" << shader_type_name << ":SHADER:" << ":COMPILATION_FAILED\n"
                   << infoLog << std::endl;
         exit(-1);
     }
 
     return shader_id;
 }
+
 void Shader::bind() const
 {
     GLCall(glUseProgram(m_shader_program_id));
