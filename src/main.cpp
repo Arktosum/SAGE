@@ -72,9 +72,10 @@ int main()
     // Cube cube(100 * 100, "./shaders/cube/cube.vert", "./shaders/cube/cube.frag");
     Axes axes("./shaders/axes/axes.vert", "./shaders/axes/axes.frag");
     Circle circle("./shaders/circle/circle.vert", "./shaders/circle/circle.frag");
-
+    GridPoints gridpoints("./shaders/gridpoints/gridpoints.vert", "./shaders/gridpoints/gridpoints.frag");
     float lastFrame = 0.0f; // Time of last frame
     float fov = 45.0f;
+    float x1 = 1.0f, x2 = 0.0f, y1 = 0.0f, y2 = 1.0f;
     while (!glfwWindowShouldClose(window))
     {
         /*
@@ -102,7 +103,6 @@ int main()
         int window_width, window_height;
         glfwGetWindowSize(window, &window_width, &window_height);
         float aspect_ratio = (float)window_width / (float)window_height;
-        std::cout << "window_width: " << window_width << " window_height: " << window_height << std::endl;
         processInput(window);
         {
 
@@ -110,9 +110,10 @@ int main()
 
             // ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
             // ImGui::Checkbox("Another Window", &show_another_window);
-            // ImGui::SliderFloat("Light Position X", &lightPos.x, -5.0f, 5.0f);
-            // ImGui::SliderFloat("Light Position Y", &lightPos.y, -5.0f, 5.0f);
-            // ImGui::SliderFloat("Light Position Z", &lightPos.z, -5.0f, 5.0f);
+            ImGui::SliderFloat("X1", &x1, -1.0f, 1.0f);
+            ImGui::SliderFloat("X2", &x2, -1.0f, 1.0f);
+            ImGui::SliderFloat("Y1", &y1, -1.0f, 1.0f);
+            ImGui::SliderFloat("Y2", &y2, -1.0f, 1.0f);
 
             // ImGui::ColorEdit3("Object color", &objectColor.x); // Edit 3 floats representing a color
             // ImGui::ColorEdit3("light color", &lightColor.x);   // Edit 3 floats representing a color
@@ -149,11 +150,18 @@ int main()
 
         // ---------------------------------------------------------------------
         {
-            glm::mat4 model(1.0f);
-            glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 200.0f);
-            glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
-            circle.set_mvp(model, view, projection);
-            circle.display();
+
+            glm::mat4 model = {
+                {x1, x2, 0, 0},
+                {y1, y2, 0, 0},
+                {0, 0, 1, 0},
+                {0, 0, 0, 1}};
+            glm::mat4 view(1.0f);
+            glm::mat4 projection = glm::ortho(-aspect_ratio, aspect_ratio, -1.0f, 1.0f);
+            // glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)window_width / (float)window_height, 0.1f, 200.0f);
+            // glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -2.0f));
+            gridpoints.set_mvp(model, view, projection);
+            gridpoints.display();
         }
         // --------------------------------------------------------------------
         ImGui::Render();

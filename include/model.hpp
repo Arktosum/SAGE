@@ -19,7 +19,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
+#include "GLManager.hpp"
 #include "vertex_buffer.hpp"
 #include "vertex_array.hpp"
 #include "shader.hpp"
@@ -210,10 +210,9 @@ private:
     unsigned int m_vertexCount;
 
 public:
-    Circle(const std::string &vertexSourcePath, const std::string &fragmentSourcePath) : m_vao(), m_vbo(), m_shader(vertexSourcePath, fragmentSourcePath)
-    {
-        
-    };
+    Circle(const std::string &vertexSourcePath, const std::string &fragmentSourcePath) : m_vao(), m_vbo(), m_shader(vertexSourcePath, fragmentSourcePath) {
+
+                                                                                         };
     void set_mvp(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection)
     {
         m_shader.bind();
@@ -229,6 +228,72 @@ public:
     }
 };
 
+class GridPoints
+{
+
+private:
+    VertexArray m_vao;
+    VertexBuffer m_vbo;
+    // ElementBuffer m_ebo;
+    Shader m_shader;
+    unsigned int m_vertexCount;
+
+public:
+    GridPoints(const std::string &vertexSourcePath, const std::string &fragmentSourcePath) : m_vao(), m_vbo(), m_shader(vertexSourcePath, fragmentSourcePath)
+    {
+
+        float step_value = 0.05f;
+        std::vector<float> vertices;
+        for (int i = -50; i <= 50; i++)
+        {
+            for (int j = -50; j <= 50; j++)
+            {
+                float x = i * step_value;
+                float y = j * step_value;
+                float z = 0.0f;
+                float r = 1.0f;
+                float g = 1.0f;
+                float b = 1.0f;
+                if (i == 0)
+                {
+                    g = 0.0f;
+                    b = 0.0f;
+                }
+                if (j == 0)
+                {
+                    r = 0.0f;
+                    b = 0.0f;
+                }
+                if (i == 0 && j == 0)
+                {
+                    r = 1.0f;
+                    g = 1.0f;
+                }
+                push_vec3(vertices, {x, y, z});
+                push_vec3(vertices, {r, g, b});
+            }
+        }
+        m_vertexCount = vertices.size() / 6;
+        VertexBufferLayout axes_layout;
+        m_vbo.loadData(vertices.data(), sizeof(float) * vertices.size());
+        axes_layout.pushAttribute(3, GL_FLOAT, false);
+        axes_layout.pushAttribute(3, GL_FLOAT, false);
+        m_vao.addBuffer(m_vbo, axes_layout);
+    };
+    void set_mvp(glm::mat4 &model, glm::mat4 &view, glm::mat4 &projection)
+    {
+        m_shader.bind();
+        m_shader.setUniformMat4fv("u_model", model);
+        m_shader.setUniformMat4fv("u_view", view);
+        m_shader.setUniformMat4fv("u_projection", projection);
+    }
+    void display()
+    {
+        m_shader.bind();
+        m_vao.bind();
+        GLCall(glDrawArrays(GL_POINTS, 0, m_vertexCount));
+    }
+};
 /*
 
 glDrawArrays — render primitives from array data
