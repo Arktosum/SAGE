@@ -1,9 +1,11 @@
+#pragma once
 #include <glad/glad.h>
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <glm/gtc/type_ptr.hpp>
 
 std::string readFile(const std::string &filepath)
 {
@@ -28,6 +30,7 @@ private:
     unsigned int shader_program;
 
 public:
+    Shader() {}
     Shader(std::string vertex_shader_path, std::string fragment_shader_path)
     {
         unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, readFile(vertex_shader_path));
@@ -86,5 +89,40 @@ public:
     ~Shader()
     {
         glDeleteProgram(shader_program);
+    }
+    int getUniformLocation(const std::string &name) const
+    {
+        int location = glGetUniformLocation(shader_program, name.c_str());
+        if (location == -1)
+        {
+            printf("Cannot find uniform name: %s", name);
+            exit(-1);
+        }
+        return location;
+    }
+    void setBool(const std::string &name, bool value) const
+    {
+
+        glUniform1i(getUniformLocation(name), (int)value);
+    }
+    void setInt(const std::string &name, int value) const
+    {
+        glUniform1i(glGetUniformLocation(shader_program, name.c_str()), value);
+    }
+    void setFloat(const std::string &name, float value) const
+    {
+        glUniform1f(glGetUniformLocation(shader_program, name.c_str()), value);
+    }
+    void setMat4(const std::string &name, glm::mat4 &matrix) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(shader_program, name.c_str()), 1, GL_FALSE, glm::value_ptr(matrix));
+    }
+    void setVec3(const std::string &name, glm::vec3 &vector) const
+    {
+        glUniform3f(glGetUniformLocation(shader_program, name.c_str()), vector[0], vector[1], vector[2]);
+    }
+    void setVec2(const std::string &name, glm::vec2 &vector) const
+    {
+        glUniform2f(glGetUniformLocation(shader_program, name.c_str()), vector[0], vector[1]);
     }
 };

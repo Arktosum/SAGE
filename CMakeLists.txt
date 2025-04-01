@@ -18,3 +18,15 @@ target_link_libraries(result PRIVATE
     user32 # User interface components
     kernel32 # Core Windows API functions
 )
+
+include(FetchContent)
+
+FetchContent_Declare(
+	glm
+	GIT_REPOSITORY	https://github.com/g-truc/glm.git
+	GIT_TAG 	bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
+target_link_libraries(result PRIVATE glm::glm)
