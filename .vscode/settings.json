@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "format": "cpp",
+        "ostream": "cpp",
+        "concepts": "cpp",
+        "iterator": "cpp",
+        "functional": "cpp",
+        "iosfwd": "cpp",
+        "iostream": "cpp",
+        "cmath": "cpp"
+    }
+}
