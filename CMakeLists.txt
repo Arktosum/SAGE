@@ -1,32 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
-project(Sage)
+project(SAGE)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_CXX_STANDARD 17)
 
-# Add All source files.
-file(GLOB SOURCES ${CMAKE_SOURCE_DIR}/src/*.cpp ${CMAKE_SOURCE_DIR}/src/*.c)
-add_executable(result ${SOURCES})
+file(GLOB SRCFILES src/*.cpp src/*.c)
+add_executable(SAGE ${SRCFILES})
 
-target_include_directories(result PRIVATE ${CMAKE_SOURCE_DIR}/external)
-target_include_directories(result PRIVATE ${CMAKE_SOURCE_DIR}/include)
-
-# Link the necessary libraries
-target_link_libraries(result PRIVATE
-    ${CMAKE_SOURCE_DIR}/lib/libglfw3.a # Path to libglfw3.a
-    opengl32 # OpenGL library
-    gdi32 # Graphics Device Interface
-    user32 # User interface components
-    kernel32 # Core Windows API functions
+# 1) Includes
+target_include_directories(SAGE PUBLIC
+  ${CMAKE_SOURCE_DIR}/external
+  ${CMAKE_SOURCE_DIR}/include
 )
 
-include(FetchContent)
-
-FetchContent_Declare(
-	glm
-	GIT_REPOSITORY	https://github.com/g-truc/glm.git
-	GIT_TAG 	bf71a834948186f4097caa076cd2663c69a10e1e #refs/tags/1.0.1
+# 3) Link libraries
+target_link_libraries(SAGE PRIVATE
+  ${CMAKE_SOURCE_DIR}/lib/libglfw3.a # Path to libglfw3.a
+  opengl32 # OpenGL library
+  gdi32 # Graphics Device Interface
+  user32 # User interface components
+  kernel32 # Core Windows API functions
 )
 
-FetchContent_MakeAvailable(glm)
-
-target_link_libraries(result PRIVATE glm::glm)
+# 4) Diagnostics
+message(STATUS "Library search path: ${CMAKE_SOURCE_DIR}/lib")
+message(STATUS "External search path: ${CMAKE_SOURCE_DIR}/external")
+message(STATUS "Includes search path: ${CMAKE_SOURCE_DIR}/include")
