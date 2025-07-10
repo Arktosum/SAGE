@@ -9,7 +9,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 class Shader
 {
 public:
@@ -93,6 +92,18 @@ public:
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
     // ------------------------------------------------------------------------
+
+    void setVec2(const std::string &name, glm::vec2 vector) const
+    {
+        unsigned int transformLocID = glGetUniformLocation(ID, name.c_str());
+        glUniform2fv(glGetUniformLocation(ID, name.c_str()), 1, &vector[0]);
+    }
+    void setVec3(const std::string &name, glm::vec3 vector) const
+    {
+        unsigned int transformLocID = glGetUniformLocation(ID, name.c_str());
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &vector[0]);
+    }
+
     void setMat4(const std::string &name, glm::mat4 matrix) const
     {
         unsigned int transformLocID = glGetUniformLocation(ID, name.c_str());

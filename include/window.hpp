@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <string>
 
 class Window
 {
@@ -19,11 +20,16 @@ public:
     }
     GLFWwindow *getWindow() const { return window; }
     static void processInput(GLFWwindow *w);
+    void setTitle(const std::string title)
+    {
+        glfwSetWindowTitle(window, title.c_str());
+    }
+
+    unsigned int screen_width;
+    unsigned int screen_height;
 
 private:
     GLFWwindow *window = NULL;
-    unsigned int m_screen_width;
-    unsigned int m_screen_height;
 
     // internal callbacks
     static void framebuffer_size_callback(GLFWwindow *w, int width, int height);

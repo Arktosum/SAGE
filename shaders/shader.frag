@@ -1,10 +1,8 @@
 #version 330 core
-out vec4 FragColor;  
-in vec3 ourColor;
+out vec4 FragColor;
+uniform vec3 u_color;
 
-uniform float u_time;
 
-void main()
-{
-    FragColor = vec4(1.0,(1+sin(2*u_time))/2,(1+cos(2*u_time))/2, 1.0);
+void main() {
+    FragColor = vec4(u_color, 1.0);
 }

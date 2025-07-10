@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-Window::Window(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT) : m_screen_width(SCREEN_WIDTH), m_screen_height(SCREEN_HEIGHT)
+Window::Window(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT) : screen_width(SCREEN_WIDTH), screen_height(SCREEN_HEIGHT)
 {
     // glfw: initialize and configure
     // ------------------------------
@@ -15,7 +15,7 @@ Window::Window(const unsigned int SCREEN_WIDTH, const unsigned int SCREEN_HEIGHT
 
     // glfw window creation
     // --------------------
-    window = glfwCreateWindow(m_screen_width, m_screen_height, "LearnOpenGL", NULL, NULL);
+    window = glfwCreateWindow(screen_width, screen_height, "LearnOpenGL", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
