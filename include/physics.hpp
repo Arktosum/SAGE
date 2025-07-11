@@ -46,6 +46,30 @@ public:
         range = glm::max(position.x, range);
         printVec2("XY", glm::vec2(range, h_max) - initial_position);
     }
+    void rk4Update(float dt)
+    {
+        if (position.y < initial_position.y)
+            return;
+
+        glm::vec2 k1_v = acceleration;
+        glm::vec2 k1_p = velocity;
+
+        glm::vec2 k2_v = acceleration;
+        glm::vec2 k2_p = velocity + 0.5f * dt * k1_v;
+
+        glm::vec2 k3_v = acceleration;
+        glm::vec2 k3_p = velocity + 0.5f * dt * k2_v;
+
+        glm::vec2 k4_v = acceleration;
+        glm::vec2 k4_p = velocity + dt * k3_v;
+
+        velocity += dt / 6.0f * (k1_v + 2.0f * k2_v + 2.0f * k3_v + k4_v);
+        position += dt / 6.0f * (k1_p + 2.0f * k2_p + 2.0f * k3_p + k4_p);
+
+        h_max = glm::max(position.y, h_max);
+        range = glm::max(position.x, range);
+        printVec2("XY", glm::vec2(range, h_max) - initial_position);
+    }
     void draw(float window_width, float window_height)
     {
         if (position.y < initial_position.y)
@@ -53,6 +77,7 @@ public:
             // Done
             return;
         }
+        circle->position = position;
         circle->draw(window_width, window_height);
     }
 };
